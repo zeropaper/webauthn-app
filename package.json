@@ -7,6 +7,7 @@
     "dev": "ts-node server.ts",
     "build": "tsc",
     "cleanup": "tsc --build --clean",
+    "postinstall": "npm run build",
     "test": "jest --passWithNoTests"
   },
   "repository": {
