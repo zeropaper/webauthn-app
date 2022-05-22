@@ -27,35 +27,43 @@ async function createApp(options: CreateAppOptions): Promise<{
   server: http.Server;
   app: express.Application;
 }> {
-  // if (!options.dbOptions) console.warn('No database options provided, using default SQLite in memory database')
-  const app = express()
-  const server = http.createServer(app)
+  try {
+    // if (!options.dbOptions) console.warn('No database options provided, using default SQLite in memory database')
+    const app = express()
+    const server = http.createServer(app)
 
-  const opts = options.dbOptions || `sqlite:${true ? resolve(__dirname, '../db.sqlite') : ':memory:'}`
-  console.info('sequelize options', opts)
-  // @ts-ignore
-  const sequelize = new Sequelize(opts)
-  app.set('sequelize', sequelize)
+    const opts = options.dbOptions || `sqlite:${true ? resolve(__dirname, '../db.sqlite') : ':memory:'}`
+    console.info('sequelize options', opts)
+    // @ts-ignore
+    const sequelize = new Sequelize(opts)
+    app.set('sequelize', sequelize)
 
-  app.set('rp', options.relayParty)
-  app.set('rpId', options.relayPartyId)
-  app.set('publicUrl', options.publicUrl)
+    app.set('rp', options.relayParty)
+    app.set('rpId', options.relayPartyId)
+    app.set('publicUrl', options.publicUrl)
 
-  // app.use(helmet())
-  app.use(express.json())
+    // app.use(helmet())
+    app.use(express.json())
 
-  app.use(express.static(options.publicDir || resolve(__dirname, '../public')));
+    app.use(express.static(options.publicDir || resolve(__dirname, '../public')));
 
-  addSessionHandling(app, options)
-  addEmail(app, options.email)
+    addSessionHandling(app, options)
+    addEmail(app, options.email)
 
-  makeModels(sequelize)
+    makeModels(sequelize)
 
-  app.use(router)
+    app.use(router)
 
-  await sequelize.sync(options.syncOptions)
+    await sequelize.sync(options.syncOptions)
 
-  return { server, app };
+    return {
+      server,
+      app
+    };
+  } catch (e) {
+    console.info('createApp error', e)
+    throw e
+  }
 }
 
 export default createApp;

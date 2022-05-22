@@ -30,7 +30,10 @@ import createApp from './lib'
 
 (async () => {
   console.info('create app to listen on port', new Date(), NODE_PORT)
-  const { server, app } = await createApp({
+  const {
+    server,
+    app
+  } = await createApp({
     publicDir: resolve(cwd(), 'public'),
     relayParty: RELAY_PARTY,
     relayPartyId: RELAY_PARTY_ID,
@@ -40,6 +43,7 @@ import createApp from './lib'
     sessionSecret: SESSION_SECRET,
     dbOptions: DB_PASS && DB_USER && DB_HOST ? {
       dialect: 'mariadb',
+      database: 'webauthn',
       host: DB_HOST,
       username: DB_USER,
       password: DB_PASS,
@@ -60,21 +64,18 @@ import createApp from './lib'
     },
   })
 
-  app.listen(NODE_PORT, () => {
+  server.listen(NODE_PORT, () => {
     console.log('Server started on port %s', NODE_PORT)
   })
-  // server.listen(NODE_PORT, () => {
-  //   console.log('Server started on port %s', NODE_PORT)
-  // })
 
-  // process.on('SIGTERM', () => {
-  //   console.info('SIGTERM signal received: closing HTTP server')
+  process.on('SIGTERM', () => {
+    console.info('SIGTERM signal received: closing HTTP server')
 
-  //   const imap = <Imap>app.get('emailin');
-  //   imap.end()
+    const imap = <Imap>app.get('emailin');
+    imap.end()
 
-  //   server.close(() => {
-  //     console.info('HTTP server closed')
-  //   })
-  // })
+    server.close(() => {
+      console.info('HTTP server closed')
+    })
+  })
 })()
