@@ -29,7 +29,7 @@ const {
 import createApp from './lib'
 
 (async () => {
-  console.info('create app to listen on port', NODE_PORT)
+  console.info('create app to listen on port', new Date(), NODE_PORT)
   const { server, app } = await createApp({
     publicDir: resolve(cwd(), 'public'),
     relayParty: RELAY_PARTY,
@@ -60,18 +60,21 @@ import createApp from './lib'
     },
   })
 
-  server.listen(NODE_PORT, () => {
+  app.listen(NODE_PORT, () => {
     console.log('Server started on port %s', NODE_PORT)
   })
+  // server.listen(NODE_PORT, () => {
+  //   console.log('Server started on port %s', NODE_PORT)
+  // })
 
-  process.on('SIGTERM', () => {
-    console.info('SIGTERM signal received: closing HTTP server')
+  // process.on('SIGTERM', () => {
+  //   console.info('SIGTERM signal received: closing HTTP server')
 
-    const imap = <Imap>app.get('emailin');
-    imap.end()
+  //   const imap = <Imap>app.get('emailin');
+  //   imap.end()
 
-    server.close(() => {
-      console.info('HTTP server closed')
-    })
-  })
+  //   server.close(() => {
+  //     console.info('HTTP server closed')
+  //   })
+  // })
 })()
