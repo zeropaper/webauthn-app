@@ -106,3 +106,7 @@ dist
 *.sqlite
 
 .env
+
+*.js
+*.js.map
+!jest.config.js
