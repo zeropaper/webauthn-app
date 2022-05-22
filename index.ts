@@ -8,7 +8,7 @@ const {
   RELAY_PARTY,
   RELAY_PARTY_ID,
   PUBLIC_URL,
-  NODE_PORT,
+  NODE_PORT = 8080,
   SESSION_STORE_NAME,
   SESSION_SECRET,
   NODEMAILER_GMAIL_USER,
@@ -29,6 +29,7 @@ const {
 import createApp from './lib'
 
 (async () => {
+  console.info('create app to listen on port', NODE_PORT)
   const { server, app } = await createApp({
     publicDir: resolve(cwd(), 'public'),
     relayParty: RELAY_PARTY,
