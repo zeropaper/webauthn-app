@@ -2,7 +2,6 @@
   "name": "webauthn-app",
   "version": "0.0.1",
   "description": "Very basic WebAuthn app aimed for authentication of personal experiments / projects.",
-  "main": "server.js",
   "scripts": {
     "dev": "ts-node server.ts",
     "build": "tsc",
