@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Very basic WebAuthn app aimed for authentication of personal experiments / projects.",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "start": "node dist/index.js",
     "dev": "ts-node index.ts",
