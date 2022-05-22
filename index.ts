@@ -1,5 +1,7 @@
 import 'dotenv/config'
 import type Imap from 'imap'
+import { resolve } from 'path'
+import { cwd } from 'process'
 
 const {
   NODE_ENV,
@@ -28,6 +30,7 @@ import createApp from './lib'
 
 (async () => {
   const { server, app } = await createApp({
+    publicDir: resolve(cwd(), 'public'),
     relayParty: RELAY_PARTY,
     relayPartyId: RELAY_PARTY_ID,
     publicUrl: PUBLIC_URL,
