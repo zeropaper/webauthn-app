@@ -18,6 +18,10 @@ const {
   EMAIL_IMAP_PORT,
   EMAIL_SMTP_HOST,
   EMAIL_SMTP_PORT,
+
+  DB_HOST,
+  DB_USER,
+  DB_PASS,
 } = process.env
 
 import createApp from './lib'
@@ -30,6 +34,12 @@ import createApp from './lib'
     syncOptions: NODE_ENV === 'development' ? { force: true } : {},
     sessionStoreName: SESSION_STORE_NAME,
     sessionSecret: SESSION_SECRET,
+    dbOptions: DB_PASS && DB_USER && DB_HOST ? {
+      dialect: 'mariadb',
+      host: DB_HOST,
+      username: DB_USER,
+      password: DB_PASS,
+    } : undefined,
     email: {
       user: EMAIL_USER,
       password: EMAIL_PASSWORD,
