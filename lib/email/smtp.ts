@@ -36,19 +36,14 @@ export function getTransport(options?: GetTransportOptions) {
     });
   }
 
-  if (options.host) {
-    if (!options.port) throw new Error('port is required when host is provided')
-    if (!options.user) throw new Error('user is required when host is provided')
-    if (!options.password) throw new Error('password is required when host is provided')
-    return nodemailer.createTransport({
-      host: options.host,
-      port: Number(options.port),
-      auth: {
-        user: options.user,
-        pass: options.password
-      }
-    });
-  }
+  return nodemailer.createTransport({
+    host: options.host,
+    port: Number(options.port),
+    auth: {
+      user: options.user,
+      pass: options.password
+    }
+  });
 }
 
 type PrepareAppOptions = GetTransportOptions
