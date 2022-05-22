@@ -2,10 +2,12 @@
   "name": "webauthn-app",
   "version": "0.0.1",
   "description": "Very basic WebAuthn app aimed for authentication of personal experiments / projects.",
+  "main": "dist/index.js",
   "scripts": {
+    "start": "node dist/index.js",
     "dev": "ts-node index.ts",
-    "build": "tsc",
-    "cleanup": "tsc --build --clean",
+    "build": "tsc --outDir dist",
+    "cleanup": "npm run build -- --build --clean",
     "postinstall": "npm run build",
     "test": "jest --passWithNoTests"
   },
