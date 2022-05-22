@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Very basic WebAuthn app aimed for authentication of personal experiments / projects.",
   "scripts": {
-    "dev": "ts-node server.ts",
+    "dev": "ts-node index.ts",
     "build": "tsc",
     "cleanup": "tsc --build --clean",
     "postinstall": "npm run build",
