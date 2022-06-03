@@ -111,3 +111,4 @@ dist
 *.js.map
 !jest.config.js
 dist
+!public/*.js

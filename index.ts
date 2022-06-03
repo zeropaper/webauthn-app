@@ -1,21 +1,19 @@
 import 'dotenv/config'
+import { Server } from 'http'
 import type Imap from 'imap'
 import { resolve } from 'path'
 import { cwd } from 'process'
 
 const {
-  NODE_ENV,
   RELAY_PARTY,
   RELAY_PARTY_ID,
   PUBLIC_URL,
-  NODE_PORT = 8080,
+
   SESSION_STORE_NAME,
   SESSION_SECRET,
-  NODEMAILER_GMAIL_USER,
-  NODEMAILER_GMAIL_APPPASS,
+
   EMAIL_PASSWORD,
   EMAIL_USER,
-  EMAIL_DOMAIN,
   EMAIL_IMAP_HOST,
   EMAIL_IMAP_PORT,
   EMAIL_SMTP_HOST,
@@ -24,21 +22,21 @@ const {
   DB_HOST,
   DB_USER,
   DB_PASS,
+
+  NODE_PORT = 8080,
 } = process.env
 
 import createApp from './lib'
 
 (async () => {
   console.info('create app to listen on port', new Date(), NODE_PORT)
-  const {
-    server,
-    app
-  } = await createApp({
+  const app = await createApp({
+    // checks: ['cron'],
     publicDir: resolve(cwd(), 'public'),
     relayParty: RELAY_PARTY,
     relayPartyId: RELAY_PARTY_ID,
     publicUrl: PUBLIC_URL,
-    syncOptions: NODE_ENV === 'development' ? { force: true } : {},
+    syncOptions: RELAY_PARTY_ID === 'localhost' ? { force: true } : { alter: true },
     sessionStoreName: SESSION_STORE_NAME,
     sessionSecret: SESSION_SECRET,
     dbOptions: DB_PASS && DB_USER && DB_HOST ? {
@@ -64,14 +62,15 @@ import createApp from './lib'
     },
   })
 
+  const server = <Server>app.get('server');
   server.listen(NODE_PORT, () => {
-    console.log('Server started on port %s', NODE_PORT)
+    console.log('Server started on %s', PUBLIC_URL)
   })
 
   process.on('SIGTERM', () => {
     console.info('SIGTERM signal received: closing HTTP server')
 
-    const imap = <Imap>app.get('emailin');
+    const imap = <Imap>app.get('imap');
     imap.end()
 
     server.close(() => {

@@ -17,7 +17,7 @@ export type EmailOptions = {
   user?: string,
   password?: string,
   imap: Omit<Parameters<typeof addIMAPEmail>[1], 'user' | 'password'>,
-  smtp: Omit<Parameters<typeof addSMTPEmail>[1], 'user' | 'password'>,
+  smtp?: Omit<Parameters<typeof addSMTPEmail>[1], 'user' | 'password'>,
 }
 
 export interface AddEmail {
@@ -25,9 +25,9 @@ export interface AddEmail {
 }
 
 export default <AddEmail>async function addEmail(app, options) {
-  if (options.smtp.gmailAppPassword && options.smtp.gmailUser) {
+  if (options.smtp?.gmailAppPassword && options.smtp?.gmailUser) {
     await addSMTPEmail(app, <GmailOptions>options.smtp);
-  } else if (options.smtp.host) {
+  } else if (options.smtp?.host) {
     await addSMTPEmail(app, {
       host: options.smtp.host,
       port: options.smtp.port,

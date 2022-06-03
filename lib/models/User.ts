@@ -1,11 +1,9 @@
-import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional, Sequelize } from 'sequelize'
+import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional, Sequelize, HasMany } from 'sequelize'
 
 export interface UserModel extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> {
-  id: CreationOptional<string>;
-  currentChallenge: string;
-  username: string;
   email: string;
-  emailVerificationToken: string;
+  id: CreationOptional<string>;
+  currentChallenge: CreationOptional<string>;
 }
 
 export const createModel = (sequelize: Sequelize) => sequelize.define<UserModel>('User', {
@@ -15,19 +13,14 @@ export const createModel = (sequelize: Sequelize) => sequelize.define<UserModel>
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  currentChallenge: {
-    type: DataTypes.STRING,
-  },
-  username: {
-    type: DataTypes.STRING,
-    unique: true
-  },
   email: {
     type: DataTypes.STRING,
-    unique: true
+    unique: true,
+    allowNull: false,
   },
-  emailVerificationToken: {
-    type: DataTypes.STRING
+  currentChallenge: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
 })
 
