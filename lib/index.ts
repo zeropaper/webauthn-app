@@ -162,7 +162,7 @@ async function createApp(options: CreateAppOptions): Promise<express.Application
     if (options.checks?.[0] === 'cron') {
       app.post('/webhook', (req, res) => {
         counter += 1
-
+        console.info('[%s] webhook', counter)
         // don't wait for the promise to resolve
         onMailCheckInterval()
         onSessionBindingInterval()
@@ -171,6 +171,7 @@ async function createApp(options: CreateAppOptions): Promise<express.Application
     } else {
       setInterval(() => {
         counter += 1
+        console.info('[%s] interval', counter)
         onMailCheckInterval()
         onSessionBindingInterval()
       }, 1000);
