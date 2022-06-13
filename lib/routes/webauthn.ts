@@ -93,7 +93,8 @@ webauthnRouter.get('/registration', async (req, res: express.Response<any, {
      * after you verify an authenticator response.
      */
     user.setDataValue('currentChallenge', options.challenge);
-    await user.save()
+    await user.save();
+    res.json(options);
   } catch (err) {
     next(err);
   }
