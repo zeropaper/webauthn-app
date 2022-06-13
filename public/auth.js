@@ -151,12 +151,23 @@
     }
 
     async #ensureSession() {
-      await this.#store.session.ensure();
+      try {
+        await this.#store.session.ensure();
+      } catch (e) {
+        console.error(e);
+      }
+      try {
+        if (typeof socket !== 'undefined' && !socket.connected) {
+          socket.connect();
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     #checkAnimationInterval = null;
     #checkAnimation() {
-      console.info('checkAnimation');
+      // console.info('checkAnimation');
     }
     #startCheckAnimation() {
       if (this.#checkAnimationInterval) return;

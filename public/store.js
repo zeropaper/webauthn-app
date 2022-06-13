@@ -54,17 +54,12 @@
     wizard: (state) => state || 'initial',
     session: sessionReducer,
   });
+  const reducer = (original, action, meta) => {
+    const state = combinedReducer(original, action, meta);
+    return state;
+  };
   const store = Redux.createStore(
-    (original, action, meta) => {
-      const state = combinedReducer(original, action, meta);
-      // state.wizard = 'initial';
-      // if (state.session.userId) {
-      //   state.wizard = 'authenticated';
-      // } else if (state.session.sessionId) {
-      //   state.wizard = 'authenticating';
-      // }
-      return state;
-    },
+    reducer,
     preloadedState,
     Redux.applyMiddleware(thunk)
   );

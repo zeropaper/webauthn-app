@@ -167,5 +167,4 @@ export default function addSockets(app: Application, server: HTTPServer, options
   // });
 
   app.set('io', io);
-  console.info('[io] added to app');
 }

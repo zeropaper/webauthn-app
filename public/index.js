@@ -23,7 +23,6 @@
     } catch (err) {
       console.error('Failed to fetch session', err);
     }
-    socket.connect();
   }
 
   await initialize();
