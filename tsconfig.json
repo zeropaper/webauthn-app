@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "lib": ["ESNext"],
+    "checkJs": false,
+    "skipLibCheck": true,
     "moduleResolution": "node",
     "target": "ES2020",
     "module": "commonjs",
@@ -9,7 +11,9 @@
     "esModuleInterop": true
   },
   "exclude": [
-    "test"
+    "test",
+    "**/__mocks__",
+    "dist"
   ],
   "include": [
     "index.ts",

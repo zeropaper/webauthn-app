@@ -4,10 +4,13 @@ import type Imap from 'imap'
 import { resolve } from 'path'
 import { cwd } from 'process'
 
+import testRouter from './test/testRouter'
+
+import createApp from './lib'
+
 const {
   RELAY_PARTY,
   RELAY_PARTY_ID,
-  PUBLIC_URL,
 
   SESSION_STORE_NAME,
   SESSION_SECRET,
@@ -24,9 +27,9 @@ const {
   DB_PASS,
 
   NODE_PORT = 8080,
-} = process.env
-
-import createApp from './lib'
+  NODE_ENV = 'development',
+  PUBLIC_URL = `http://localhost:${NODE_PORT}`,
+} = process.env;
 
 (async () => {
   console.info('create app to listen on port', new Date(), NODE_PORT)
@@ -60,6 +63,9 @@ import createApp from './lib'
         tls: true,
       },
     },
+    routers: NODE_ENV === 'test' ? {
+      '/test': testRouter,
+    } : {}
   })
 
   const server = <Server>app.get('server');

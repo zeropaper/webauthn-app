@@ -112,3 +112,6 @@ dist
 !jest.config.js
 dist
 !public/*.js
+/test-results/
+/playwright-report/
+/playwright/.cache/

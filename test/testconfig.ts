@@ -8,7 +8,7 @@ const options: CreateAppOptions = {
   publicDir: resolve(cwd(), 'public'),
   relayParty: 'localhost',
   relayPartyId: 'localhost',
-  publicUrl: 'http://localhost:8080',
+  publicUrl: `http://localhost:${process.env.NODE_PORT || 9000}/`,
   syncOptions: { force: true },
   sessionStoreName: 'SESSION_STORE_NAME',
   sessionSecret: 'SESSION_SECRET',
