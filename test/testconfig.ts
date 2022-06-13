@@ -2,9 +2,13 @@ import { resolve } from 'path'
 import { cwd } from 'process'
 import type { CreateAppOptions } from "../lib"
 
+export function sqliteConfig(name = 'test') {
+  return `sqlite:${name ? resolve(__dirname, `../${name}.sqlite`) : ':memory:'}`
+}
+
 const options: CreateAppOptions = {
   checks: ['cron'],
-  dbOptions: `sqlite:${true ? resolve(__dirname, '../test.sqlite') : ':memory:'}`,
+  dbOptions: sqliteConfig(),
   publicDir: resolve(cwd(), 'public'),
   relayParty: 'localhost',
   relayPartyId: 'localhost',
