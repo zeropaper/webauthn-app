@@ -196,6 +196,6 @@ export async function addIMAPEmail(app: Application, options: Config): Promise<v
       console.info('[imap] end')
     });
 
-    imap.connect();
+    if (process.env.NODE_ENV !== 'test') imap.connect();
   })
 }
