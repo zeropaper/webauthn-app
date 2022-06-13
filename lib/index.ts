@@ -31,12 +31,13 @@ export type CreateAppOptions = {
 
 let counter = 0;
 function makeOnMailCheckInterval(app: Application) {
+  if (!app.get('imap')) return () => { };
   const sequelize: Sequelize = app.get('sequelize');
   const ImapMail = <Models['ImapMail']>sequelize.model('ImapMail')
   async function onInterval() {
     try {
       const mailSummaries = await processInbox(app, {})
-      const mails = await ImapMail.bulkCreate(mailSummaries, {
+      await ImapMail.bulkCreate(mailSummaries, {
         updateOnDuplicate: ['from', 'sessionId']
       });
       // console.info('[%s] found %s incoming mails', counter, mails.length)
@@ -133,7 +134,7 @@ async function createApp(options: CreateAppOptions): Promise<express.Application
     app.set('rpId', options.relayPartyId);
     app.set('publicUrl', options.publicUrl);
 
-    app.use(helmet());
+    if (process.env.NODE_ENV !== 'test') app.use(helmet());
     app.use(cors({
       origin: true,
       credentials: true,

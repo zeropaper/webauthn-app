@@ -103,11 +103,18 @@ webauthnRouter.get('/registration', async (req, res: express.Response<any, {
 // verifies of a webauthn registration
 webauthnRouter.post('/registration', async (req, res, next) => {
   try {
+    const sequelize = req.app.get('sequelize');
+    const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user: Instances['User'] = res.locals.user;
     const body: RegistrationCredentialJSON = req.body;
     console.info('[webauthn] POST registration', user, body);
 
     const expectedChallenge = user.currentChallenge;
+    const devices = await AuthticatorDevice.findAll({
+      where: {
+        userId: user.id,
+      }
+    });
 
     let verification: VerifiedRegistrationResponse;
     try {
@@ -128,9 +135,13 @@ webauthnRouter.post('/registration', async (req, res, next) => {
     const { verified, registrationInfo } = verification;
 
     if (verified && registrationInfo) {
-      const { credentialPublicKey, credentialID, counter } = registrationInfo;
+      const {
+        credentialPublicKey,
+        credentialID,
+        counter,
+      } = registrationInfo;
 
-      const existingDevice = user.devices.find(device => device.credentialID === credentialID);
+      const existingDevice = devices.find(device => device.credentialID === credentialID.toString());
 
       if (!existingDevice) {
         /**
@@ -142,9 +153,12 @@ webauthnRouter.post('/registration', async (req, res, next) => {
           counter,
           transports: body.transports,
         };
-        user.devices.push(newDevice);
+        // user.devices.push(newDevice);
       }
     }
+
+    user.setDataValue('currentChallenge', null);
+    await user.save();
 
     res.send({ verified });
   } catch (err) {

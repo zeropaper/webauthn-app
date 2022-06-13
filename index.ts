@@ -4,8 +4,6 @@ import type Imap from 'imap'
 import { resolve } from 'path'
 import { cwd } from 'process'
 
-import testRouter from './test/testRouter'
-
 import createApp from './lib'
 
 const {
@@ -27,7 +25,6 @@ const {
   DB_PASS,
 
   NODE_PORT = 8080,
-  NODE_ENV = 'development',
   PUBLIC_URL = `http://localhost:${NODE_PORT}`,
 } = process.env;
 
@@ -63,9 +60,6 @@ const {
         tls: true,
       },
     },
-    routers: NODE_ENV === 'test' ? {
-      '/test': testRouter,
-    } : {}
   })
 
   const server = <Server>app.get('server');

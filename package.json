@@ -11,7 +11,7 @@
     "postinstall": "npm run build",
     "test": "jest --passWithNoTests",
     "e2e:dev": "nodemon -w tests -e .ts -x 'npx playwright test --project=chromium --headed'",
-    "e2e:server": "npm run build && NODE_PORT=9000 NODE_ENV=test node dist/index.js"
+    "e2e:server": "npm run build && NODE_PORT=9000 NODE_ENV=test node dist/playwright.server.js"
   },
   "repository": {
     "type": "git",

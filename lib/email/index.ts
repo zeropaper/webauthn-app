@@ -16,7 +16,7 @@ export type DefaultOptions = {
 export type EmailOptions = {
   user?: string,
   password?: string,
-  imap: Omit<Parameters<typeof addIMAPEmail>[1], 'user' | 'password'>,
+  imap?: Omit<Parameters<typeof addIMAPEmail>[1], 'user' | 'password'>,
   smtp?: Omit<Parameters<typeof addSMTPEmail>[1], 'user' | 'password'>,
 }
 
@@ -39,9 +39,9 @@ export default <AddEmail>async function addEmail(app, options) {
     await addSMTPEmail(app);
   }
 
-  await addIMAPEmail(app, {
+  await addIMAPEmail(app, options.imap ? {
     ...options.imap,
     user: options.user,
     password: options.password,
-  });
+  } : undefined);
 }

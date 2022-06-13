@@ -174,8 +174,14 @@ export async function processInbox(app: Application, options: { [k: string]: any
 }
 
 export async function addIMAPEmail(app: Application, options: Config): Promise<void> {
+  app.set('imapoptions', options);
+  // not really elegant, but for now, i guess it's OK
+  if (!options) {
+    app.set('imap', null);
+    app.set('imapbox', null);
+    return Promise.resolve();
+  }
   const imap = new Imap(options);
-  app.set('imapoptions', options)
 
   return new Promise((resolve, reject) => {
     imap.once('ready', function () {
@@ -188,7 +194,7 @@ export async function addIMAPEmail(app: Application, options: Config): Promise<v
     });
 
     imap.once('error', function (err: any) {
-      console.error('imap error', err)
+      console.error('[imap] error', err)
       reject(err)
     });
 
@@ -196,6 +202,6 @@ export async function addIMAPEmail(app: Application, options: Config): Promise<v
       console.info('[imap] end')
     });
 
-    if (process.env.NODE_ENV !== 'test') imap.connect();
+    imap.connect();
   })
 }
