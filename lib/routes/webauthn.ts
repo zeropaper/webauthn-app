@@ -31,17 +31,12 @@ webauthnRouter.use(loadUser);
 // returns the options for webauthn registration
 webauthnRouter.get('/registration', async (req, res: express.Response<any, {
   user: Instances['User'];
+  authenticatorDevices: Instances['AuthenticatorDevice'][];
 }>, next) => {
   try {
     const sequelize = req.app.get('sequelize');
-    const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user = res.locals.user;
-
-    const devices = await AuthticatorDevice.findAll({
-      where: {
-        userId: user.id,
-      }
-    });
+    const devices = res.locals.authenticatorDevices;
 
     const opts: GenerateRegistrationOptionsOpts = {
       rpName: req.app.get('rp'),
@@ -90,19 +85,18 @@ webauthnRouter.get('/registration', async (req, res: express.Response<any, {
 });
 
 // verifies of a webauthn registration
-webauthnRouter.post('/registration', async (req, res, next) => {
+webauthnRouter.post('/registration', async (req, res: express.Response<any, {
+  user: Instances['User'];
+  authenticatorDevices: Instances['AuthenticatorDevice'][];
+}>, next) => {
   try {
     const sequelize = req.app.get('sequelize');
     const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user: Instances['User'] = res.locals.user;
     const body: RegistrationCredentialJSON = req.body;
+    const devices = res.locals.authenticatorDevices;
 
     const expectedChallenge = user.currentChallenge;
-    const devices = await AuthticatorDevice.findAll({
-      where: {
-        userId: user.id,
-      }
-    });
 
     let verification: VerifiedRegistrationResponse;
     try {
@@ -154,16 +148,13 @@ webauthnRouter.post('/registration', async (req, res, next) => {
 });
 
 // returns the options for webauthn authentication
-webauthnRouter.get('/authentication', async (req, res, next) => {
+webauthnRouter.get('/authentication', async (req, res: express.Response<any, {
+  user: Instances['User'];
+  authenticatorDevices: Instances['AuthenticatorDevice'][];
+}>, next) => {
   try {
-    const sequelize = req.app.get('sequelize');
-    const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user: Instances['User'] = res.locals.user;
-    const devices = await AuthticatorDevice.findAll({
-      where: {
-        userId: user.id,
-      }
-    });
+    const devices = res.locals.authenticatorDevices;
 
     const opts: GenerateAuthenticationOptionsOpts = {
       timeout: 60000,
@@ -191,26 +182,24 @@ webauthnRouter.get('/authentication', async (req, res, next) => {
 });
 
 // verifies of a webauthn authentication
-webauthnRouter.post('/authentication', async (req, res, next) => {
+webauthnRouter.post('/authentication', async (req, res: express.Response<any, {
+  user: Instances['User'];
+  authenticatorDevices: Instances['AuthenticatorDevice'][];
+}>, next) => {
   try {
     const sequelize = req.app.get('sequelize');
-    const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user: Instances['User'] = res.locals.user;
+    const devices = res.locals.authenticatorDevices;
     const body: AuthenticationCredentialJSON = req.body;
-    const devices = await AuthticatorDevice.findAll({
-      where: {
-        userId: user.id,
-      }
-    });
 
     const expectedChallenge = user.currentChallenge;
 
     let dbAuthenticator;
     const bodyCredIDBuffer = base64url.toBuffer(body.rawId);
     // "Query the DB" here for an authenticator matching `credentialID`
-    for (const dev of devices) {
-      if (dev.credentialID.equals(bodyCredIDBuffer)) {
-        dbAuthenticator = dev;
+    for (const device of devices) {
+      if (device.credentialID.equals(bodyCredIDBuffer)) {
+        dbAuthenticator = device;
         break;
       }
     }
