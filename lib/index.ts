@@ -40,7 +40,6 @@ function makeOnMailCheckInterval(app: Application) {
       await ImapMail.bulkCreate(mailSummaries, {
         updateOnDuplicate: ['from', 'sessionId']
       });
-      // console.info('[%s] found %s incoming mails', counter, mails.length)
     } catch (err) {
       console.error('[%s] onInterval error', counter, err.stack)
     }
@@ -76,7 +75,6 @@ function makeOnSessionBindingInterval(app: Application) {
           sessionId: sid,
         }
       });
-      // console.info('[%s] found %s mail summaries for session %s', counter, sessionMails.length, sid);
       if (!sessionMails.length) return;
       toDestroy.push(...sessionMails);
 
@@ -90,7 +88,6 @@ function makeOnSessionBindingInterval(app: Application) {
         }
       });
 
-      // console.info('[%s] user %s', counter, user.getDataValue('id'))
 
       const newData = {
         // socketIds: [],
@@ -100,7 +97,6 @@ function makeOnSessionBindingInterval(app: Application) {
       session.setDataValue('data', JSON.stringify(newData));
       await session.save();
 
-      // console.info('[%s] update %s data', counter, session.getDataValue('sid'), newData.socketIds)
       emitToSessionSockets(app.get('io'), newData.socketIds || [], 'sessionSocketsChange', {
         ...newData,
         sessionId: sid,
@@ -111,7 +107,6 @@ function makeOnSessionBindingInterval(app: Application) {
           console.error('emitToSessionSockets error for %s user', newData.userId, newData.socketIds, err);
           return;
         }
-        // console.info('[%s] --- sent to user %s, sockets %s', counter, newData.userId, newData.socketIds?.join('\n'))
       })
     }));
 
@@ -167,7 +162,6 @@ async function createApp(options: CreateAppOptions): Promise<express.Application
     if (options.checks?.[0] === 'cron') {
       app.post('/webhook', (req, res) => {
         counter += 1
-        console.info('[%s] webhook', counter)
         // don't wait for the promise to resolve
         onMailCheckInterval()
         onSessionBindingInterval()
@@ -176,7 +170,6 @@ async function createApp(options: CreateAppOptions): Promise<express.Application
     } else {
       setInterval(() => {
         counter += 1
-        console.info('[%s] interval', counter)
         onMailCheckInterval()
         onSessionBindingInterval()
       }, 1000);
@@ -185,7 +178,6 @@ async function createApp(options: CreateAppOptions): Promise<express.Application
     app.set('server', server)
     return app;
   } catch (e) {
-    // console.info('createApp error', e)
     throw e
   }
 }

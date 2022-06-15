@@ -36,7 +36,6 @@ webauthnRouter.get('/registration', async (req, res: express.Response<any, {
     const sequelize = req.app.get('sequelize');
     const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user = res.locals.user;
-    console.info('[webauthn] GET registration', user);
 
     const devices = await AuthticatorDevice.findAll({
       where: {
@@ -97,7 +96,6 @@ webauthnRouter.post('/registration', async (req, res, next) => {
     const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user: Instances['User'] = res.locals.user;
     const body: RegistrationCredentialJSON = req.body;
-    console.info('[webauthn] POST registration', user, body);
 
     const expectedChallenge = user.currentChallenge;
     const devices = await AuthticatorDevice.findAll({
@@ -167,7 +165,6 @@ webauthnRouter.get('/authentication', async (req, res, next) => {
       }
     });
 
-    console.info('[webauthn] GET authentication', user);
     const opts: GenerateAuthenticationOptionsOpts = {
       timeout: 60000,
       allowCredentials: devices.map(dev => ({
@@ -199,7 +196,6 @@ webauthnRouter.post('/authentication', async (req, res, next) => {
     const sequelize = req.app.get('sequelize');
     const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user: Instances['User'] = res.locals.user;
-    console.info('[webauthn] POST authentication', user)
     const body: AuthenticationCredentialJSON = req.body;
     const devices = await AuthticatorDevice.findAll({
       where: {

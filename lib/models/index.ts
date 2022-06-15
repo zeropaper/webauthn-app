@@ -10,10 +10,6 @@ function makeModels(sequelize: Sequelize) {
   const ImapMail = createImapMailModel(sequelize);
   const AuthenticatorDevice = createAuthenticatorDeviceModel(sequelize);
 
-  // User.AuthenticatorDevice = User.hasMany(AuthenticatorDevice, {
-  //   foreignKey: "userId",
-  //   as: "authenticatorDevices",
-  // });
   return {
     User,
     ImapMail,

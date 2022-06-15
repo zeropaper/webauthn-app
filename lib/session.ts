@@ -38,21 +38,6 @@ function addSessionHandling(app: Application, options: {
           obj[sid] = result;
           return obj;
         }, {})))
-
-      // .then((results) => cb(null, results
-      //   .reduce((obj, result) => {
-      //     // @ts-ignore
-      //     const { sid, data } = result.dataValues;
-      //     obj[sid] = JSON.parse(data);
-      //     return obj;
-      //   }, {})))
-
-      // .reduce(async (obj, result) => {
-      //   // @ts-ignore
-      //   obj[result.dataValues.sid] = await getSession(result.dataValues.sid);
-      //   return obj;
-      // }, {})))
-
       .catch(cb);
   }
 

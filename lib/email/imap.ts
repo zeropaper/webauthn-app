@@ -143,10 +143,6 @@ export async function addIMAPEmail(app: Application, options: Config): Promise<v
       reject(err)
     });
 
-    imap.once('end', function () {
-      console.info('[imap] end')
-    });
-
     imap.connect();
   })
 }

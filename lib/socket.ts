@@ -43,9 +43,7 @@ function unique(arr: string[]): string[] {
 
 export async function emitToSessionSockets(io: IO, socketIds: string[], eventName: string, ...args: any[]): Promise<void> {
   const sockets = await io.fetchSockets()
-  // console.info('[io] sockets', sockets.length)
   if (!socketIds) return;
-  // console.info('[io] emitting to session.socketIds', socketIds, eventName, ...args)
   socketIds.forEach((socketId) => {
     const socket = sockets.find(s => s.id === socketId);
     if (!socket) return;
@@ -57,7 +55,6 @@ function bindSession(app: Application, socket: Socket): Promise<void> {
   const { session } = socket.request;
   const io: IO = app.get('io');
 
-  console.info('[io] binding to session.socketIds', session, socket.id)
   if (!session) {
     return Promise.resolve();
   }
@@ -65,7 +62,6 @@ function bindSession(app: Application, socket: Socket): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const sessionDb = await app.get('sequelize').model('Session').findByPk(session.id);
     const data = JSON.parse(sessionDb?.getDataValue('data') || '{}');
-    console.info('[io] bindSession', data.userId, session.userId);
 
     session.socketIds = unique([
       ...(session.socketIds || []),
@@ -84,7 +80,6 @@ function bindSession(app: Application, socket: Socket): Promise<void> {
     session.userId = session.userId || data.userId;
     session.save((e) => {
       if (e) return reject(e);
-      console.info('[io] added to session.socketIds', session.id, socket.id)
       emitToSessionSockets(io, session.socketIds, 'sessionBound', {
         sessionId: session.id,
         userId: session.userId,
@@ -105,7 +100,6 @@ function unbindSession(app: Application, socket: Socket): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const sessionDb = await app.get('sequelize').model('Session').findByPk(session.id);
     const data = JSON.parse(sessionDb?.getDataValue('data') || '{}');
-    console.info('[io] unbindSession', data.userId, session.userId);
 
     session.socketIds = unique([
       ...(session.socketIds || []),
@@ -122,7 +116,6 @@ function unbindSession(app: Application, socket: Socket): Promise<void> {
     session.userId = session.userId || data.userId;
     session.save((e) => {
       if (e) return reject(e);
-      console.info('[io] removed from session.socketIds', session.id, socket.id)
       emitToSessionSockets(io, session.socketIds, 'sessionUnbound', {
         sessionId: session.id,
         userId: session.userId,
@@ -130,8 +123,7 @@ function unbindSession(app: Application, socket: Socket): Promise<void> {
       });
       resolve()
     })
-  })
-  return Promise.resolve();
+  });
 }
 
 export type IO = SocketIoServer<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>

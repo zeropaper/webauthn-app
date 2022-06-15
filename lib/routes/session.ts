@@ -2,7 +2,6 @@ import * as express from 'express'
 import { Session, SessionData } from 'express-session';
 
 import loadUser from '../middlewares/loadUser';
-// import { Models } from '../models';
 
 const sessionRouter = express.Router()
 
@@ -32,12 +31,9 @@ sessionRouter.get('/', loadUser, (req, res, next) => {
 })
 
 sessionRouter.delete('/', async function (req, res, next) {
-  // const Session = <Models['Session']>req.app.get('sequelize').model('Session');
   req.session.cookie.expires = new Date(0);
   req.session.destroy(async (err) => {
     if (err) return next(err);
-    // const sessionDb = await Session.findByPk(req.sessionID);
-    // await sessionDb?.destroy();
     res.status(204).end();
   });
 })
