@@ -4,17 +4,78 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./styles.css" />
-    <title>SimpleWebAuthn Example Site</title>
+    <title>zeropaper's auth* tool</title>
 
     <script src="./simplewebauthn.min.js"></script>
     <script src="./socket.io.min.js"></script>
     <script src="./redux.min.js"></script>
-    <script src="./store.js"></script>
-    <script src="./auth.js"></script>
   </head>
   <body>
-    <web-authn>Pep text</web-authn>
+    <section id="web-authn">
+      <web-authn></web-authn>
+    </section>
 
+    <section id="help">
+      <header>
+        <h1>zeropaper's auth* tool</h1>
+        <p>
+          A <strong>truly</strong> passwrodless authentication system for web browsers.
+        </p>
+        <p class="disclaimer">
+          <strong>Disclaimer:</strong> This is an experiment and work in progress. At this stage, it is just a proof of concept and <a href="http://github.com/zeropaper/webauthn-app">its code</a> still needs to be improved.
+        </p>
+      </header>
+      <main>
+        <h2>How to use</h2>
+        <ol>
+          <li>
+            <strong>
+              Click the "Start" button.
+            </strong>
+            <p>
+              A unique, short lived, email address will be created and shown to you.
+            </p>
+          </li>
+          <li>
+            <strong>
+              Click the shown email address.
+            </strong>
+            <p>
+              Usually, this action will open your default email client.
+            </p>
+            <p>
+              You should only need to click the "Send".<br/>
+              The email does not require s subject or a body, but it must be sent to the address you see.
+            </p>
+          </li>
+          <li>
+            <strong>
+              Wait for the email to arrive.
+            </strong>
+            <p>
+              Once the email arrives, and could be processed, you should be logged in automatically.
+            </p>
+            <p>
+              This can take up to 30 seconds.
+            </p>
+            <p>
+              The user account creation (or authentication) will used an anonymized piece of text based your email address (the sender). All the mails are deleted after processing and thus only your email address is only stored for a brief period of time.
+            </p>
+          </li>
+          <li>
+            <strong>
+              You will be offered to register a device.
+            </strong>
+            <p>
+              
+            </p>
+          </li>
+        </ol>
+      </main>
+    </section>
+
+    <script src="./store.js"></script>
+    <script src="./auth.js"></script>
     <script src="./socket.js"></script>
     <script src="./index.js"></script>
   </body>

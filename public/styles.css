@@ -4,16 +4,14 @@
   --button: white;
   --button-active: #eeeeee;
   --button-hover: #efefef;
-}
-
-* {
   font-size: 16px;
   font-family: 'Courier New', Courier, monospace;
+  font-family: 'Liberation Sans', 'Roboto', sans-serif;
 }
 
 body {
   margin: 0;
-  padding: 0;
+  padding: 1rem;
   background: var(--background);
   color: var(--text);
 }
@@ -22,10 +20,6 @@ body {
 @media (min-width: 75rem) {
   * {
     font-size: 20px;
-  }
-
-  .container {
-    width: 45rem;
   }
 }
 
@@ -37,4 +31,13 @@ body {
     --button-active: #eeeeee;
     --button-hover: #444c56;
   }
+}
+
+#web-authn {
+  max-width: 350px;
+  padding: 2rem;
+  margin: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid;
 }
