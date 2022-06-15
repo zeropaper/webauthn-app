@@ -125,11 +125,13 @@ async function createApp(options: CreateAppOptions): Promise<express.Application
     const app = express();
     const server = http.createServer(app);
 
-    const opts = options.dbOptions || `sqlite:${true ? resolve(__dirname, '../db.sqlite') : ':memory:'}`
-    const sequelize = typeof options.dbOptions === 'string' ? new Sequelize(opts as string, { logging: false }) : new Sequelize({
-      ...opts as object,
-      logging: false,
-    });
+    const opts = options.dbOptions || `sqlite:${true ? resolve(__dirname, '../db.sqlite') : ':memory:'}`;
+    const sequelize = typeof opts === 'string'
+      ? new Sequelize(opts as string, { logging: false })
+      : new Sequelize({
+        ...opts as object,
+        logging: false,
+      });
     app.set('sequelize', sequelize);
 
     app.set('rp', options.relayParty);
