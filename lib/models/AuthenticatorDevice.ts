@@ -1,6 +1,6 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, Sequelize } from 'sequelize';
 
-import {
+import type {
   AuthenticatorTransport,
 } from '@simplewebauthn/typescript-types';
 

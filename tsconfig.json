@@ -12,6 +12,8 @@
   },
   "exclude": [
     "test",
+    "playwright-report",
+    "public",
     "**/__mocks__",
     "dist"
   ],
