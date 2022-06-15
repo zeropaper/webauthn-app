@@ -1,4 +1,7 @@
 (() => {
+  const { browserSupportsWebauthn, startRegistration, startAuthentication } =
+    SimpleWebAuthnBrowser;
+
   const sessionReducer = (state = {}, action) => {
     switch (action.type) {
       case 'SET_SESSION':
@@ -34,6 +37,50 @@
     return fetch('/session', { method: 'DELETE' }).then(() => ({
       type: 'LOGOUT',
     }));
+  }
+
+  async function registerDevice() {
+    if (!browserSupportsWebauthn()) throw new Error('WebAuthn not supported');
+    const endpoint = '/webauthn/registration';
+    const registrationResponse = await fetch(endpoint);
+    const info = await startRegistration(await registrationResponse.json());
+    const verificationResponse = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(info),
+    });
+    const response = await verificationResponse.json();
+    if (response.verified) {
+      console.info('[webauthn] device registered', response);
+      return {
+        type: 'SET_REGISTERED_DEVICE',
+      };
+    }
+    throw new Error('Failed to register device');
+  }
+
+  async function authenticateDevice() {
+    if (!browserSupportsWebauthn()) throw new Error('WebAuthn not supported');
+    const endpoint = '/webauthn/authentication';
+    const authenticationResponse = await fetch(endpoint);
+    const info = await startAuthentication(await authenticationResponse.json());
+    const verificationResponse = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(info),
+    });
+    const response = await verificationResponse.json();
+    if (response.verified) {
+      console.info('[webauthn] device authenticated', response);
+      return {
+        type: 'SET_AUTHENTICATED_DEVICE',
+      };
+    }
+    throw new Error('Failed to authenticate device');
   }
 
   const preloadedState = {
@@ -75,6 +122,8 @@
       ensure: wrap(ensureSession),
       destroy: wrap(destroySession),
       set: wrap(setSession),
+      registerDevice: wrap(registerDevice),
+      authenticateDevice: wrap(authenticateDevice),
     },
   };
   console.info('[redux] store', store);

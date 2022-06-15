@@ -1,12 +1,10 @@
 import { createHmac } from "crypto";
 import type { Application } from "express";
 import Imap, { Config } from 'imap'
-import { deprecate } from "util";
 
 const fetchOptions = {
   bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)',
   struct: true,
-  // markSeen: true,
 }
 
 type MailInfo = {
@@ -33,8 +31,8 @@ function mailSummary(mail: MailInfo): MailSummary {
     .split('@').at(0)
     .split('+').at(1);
   return {
-    from: getEmailAddress(mail.headers.from),
-    // from: createHmac('sha256', getEmailAddress(mail.headers.from)).digest('hex'),
+    // from: getEmailAddress(mail.headers.from),
+    from: createHmac('sha256', getEmailAddress(mail.headers.from)).digest('hex'),
     sessionId,
   }
 }
@@ -86,59 +84,6 @@ function processMessage(msg: Imap.ImapMessage, seqno: any): Promise<MailInfo> {
     });
   })
 }
-
-export const getMailsForToken = deprecate(function getMailsForToken(imap: Imap, email: string, token: string): Promise<MailInfo[]> {
-  const [user, domain] = email.split('@')
-  const emailWithToken = `${user}+${token}@${domain}`
-  const mails: any[] = []
-
-  return new Promise((resolve, reject) => {
-    async function finish() {
-      const filtered = mails.filter((mail: any) => {
-        const included = mail.headers.to.includes(emailWithToken)
-        if (included) return true;
-
-        for (const item in mail.headers.to) {
-          if (mail.headers.to[item].includes(emailWithToken)) return true
-        }
-      })
-
-      if (!filtered.length) return resolve([]);
-
-      try {
-        await deleteMails(imap, filtered)
-        resolve(filtered)
-      } catch (e) {
-        reject(e)
-      }
-    }
-
-    // imap.openBox('INBOX', false, async function (err, box) {
-    //   if (err) return reject(err);
-    //   console.info('[imap] box open and writeable', box.messages);
-    //   if (!box.messages.total) return finish();
-    imap.search([
-      'UNSEEN',
-      // ['TO', emailWithToken]
-    ], function (err, results) {
-      // console.info('[imap] search', err, results);
-      if (err) return reject(err)
-      if (!results.length) return resolve(mails)
-
-      const f = imap.fetch(results, {
-        ...fetchOptions,
-        // markSeen: true
-      });
-      f.on('message', async (msg, seqno) => {
-        const mail = await processMessage(msg, seqno)
-        mails.push(mail)
-        if (mails.length === results.length) finish()
-      });
-      f.once('error', reject);
-    });
-    // })
-  })
-}, 'getMailsForToken is deprecated. Use processInbox instead.')
 
 export async function processInbox(app: Application, options: { [k: string]: any }): Promise<MailSummary[]> {
   const imap = app.get('imap');

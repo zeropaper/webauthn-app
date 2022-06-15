@@ -8,6 +8,10 @@
     .hidden {
       display: none;
     }
+    .email {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .email:visited::after {
       content: ' ✓';
     }
@@ -94,31 +98,48 @@
       this.shadowRoot.appendChild(style);
 
       const wrapper = document.createElement('div');
-      wrapper.setAttribute('class', 'wrapper');
+      wrapper.classList.add('wrapper');
       const slotWrapper = document.createElement('div');
-      slotWrapper.setAttribute('class', 'content-wrapper');
+      slotWrapper.classList.add('content-wrapper');
       const slot = document.createElement('slot');
       slotWrapper.appendChild(slot);
 
       const stageWrapper = document.createElement('div');
       const stage = document.createElement('span');
-      stage.setAttribute('class', 'stage');
+      stage.classList.add('stage');
       const stageAction = document.createElement('button');
-      stageAction.setAttribute('class', 'stage-action');
+      stageAction.classList.add('stage-action');
       stageAction.textContent = 'Start';
       stageAction.addEventListener('click', () => this.#handleStageAction());
       stageWrapper.appendChild(stage);
       stageWrapper.appendChild(stageAction);
 
       const userInfo = document.createElement('div');
-      userInfo.setAttribute('class', 'user-info');
+      userInfo.classList.add('user-info');
       const userEmail = document.createElement('div');
-      userEmail.setAttribute('class', 'user-email');
+      userEmail.classList.add('user-email');
       userInfo.appendChild(userEmail);
+      const deviceRegister = document.createElement('button');
+      deviceRegister.classList.add('device-register');
+      deviceRegister.textContent = 'Register Device';
+      deviceRegister.addEventListener('click', () => {
+        this.#handleDeviceRegister();
+      });
+      deviceRegister.type = 'button';
+      userInfo.appendChild(deviceRegister);
+      const deviceAuthenticate = document.createElement('button');
+      deviceAuthenticate.classList.add('device-register');
+      deviceAuthenticate.textContent = 'Authenticate Device';
+      deviceAuthenticate.addEventListener('click', () => {
+        this.#handleDeviceAuthenticate();
+      });
+      deviceAuthenticate.type = 'button';
+      userInfo.appendChild(deviceAuthenticate);
 
       const authenticationWrapper = document.createElement('div');
+      authenticationWrapper.classList.add('authentication-email-wrapper');
       const email = document.createElement('a');
-      email.setAttribute('class', 'email');
+      email.classList.add('email', 'button');
       email.setAttribute('target', '_blank');
       email.onclick = () => {
         email.classList.add('clicked');
@@ -126,7 +147,7 @@
       authenticationWrapper.appendChild(email);
 
       const checkIndicator = document.createElement('div');
-      checkIndicator.setAttribute('class', 'check-indicator');
+      checkIndicator.classList.add('check-indicator');
 
       wrapper.appendChild(slotWrapper);
       wrapper.appendChild(stageWrapper);
@@ -181,6 +202,14 @@
       this.#checkAnimationInterval = null;
     }
 
+    async #handleDeviceRegister() {
+      this.#store.session.registerDevice();
+    }
+
+    async #handleDeviceAuthenticate() {
+      this.#store.session.authenticateDevice();
+    }
+
     #updateDOM() {
       const $ = this.#$.bind(this);
 
@@ -197,7 +226,7 @@
         email.classList.add('hidden');
         stageAction.textContent = this.getAttribute('txt-logout') || 'Logout';
         stage.textContent = '🔒';
-        userInfo.textContent = `User Id: ${session?.userId}`;
+
         this.#stopCheckAnimation();
       } else if (this.hasSession) {
         userInfo.classList.add('hidden');
@@ -210,6 +239,7 @@
           'href',
           `mailto:${emailAddress}?subject=Account%20Creation`
         );
+        email.setAttribute('sessionId', session?.sessionId);
         email.textContent = emailAddress;
       } else {
         userInfo.classList.add('hidden');

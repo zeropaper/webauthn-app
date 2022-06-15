@@ -1,18 +1,9 @@
-import * as express from 'express'
-import https from 'https';
-import http from 'http';
-import fs, { appendFile } from 'fs';
-
-import dotenv from 'dotenv';
+import * as express from 'express';
 import base64url from 'base64url';
 
-dotenv.config();
-
 import {
-  // Registration
   generateRegistrationOptions,
   verifyRegistrationResponse,
-  // Authentication
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
 } from '@simplewebauthn/server';
@@ -28,7 +19,6 @@ import type {
 import type {
   RegistrationCredentialJSON,
   AuthenticationCredentialJSON,
-  AuthenticatorDevice,
 } from '@simplewebauthn/typescript-types';
 
 import loadUser from '../middlewares/loadUser';
@@ -43,16 +33,16 @@ webauthnRouter.get('/registration', async (req, res: express.Response<any, {
   user: Instances['User'];
 }>, next) => {
   try {
-    // const sequelize = req.app.get('sequelize');
-    // const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
+    const sequelize = req.app.get('sequelize');
+    const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user = res.locals.user;
     console.info('[webauthn] GET registration', user);
 
-    // const devices = await AuthticatorDevice.findAll({
-    //   where: {
-    //     userId: user.id,
-    //   }
-    // });
+    const devices = await AuthticatorDevice.findAll({
+      where: {
+        userId: user.id,
+      }
+    });
 
     const opts: GenerateRegistrationOptionsOpts = {
       rpName: req.app.get('rp'),
@@ -67,12 +57,12 @@ webauthnRouter.get('/registration', async (req, res: express.Response<any, {
        * the browser if it's asked to perform registration when one of these ID's already resides
        * on it.
        */
-      // excludeCredentials: devices.map((dev) => ({
-      //   // should be a BufferSource
-      //   id: dev.credentialID as any,
-      //   type: 'public-key',
-      //   transports: dev.transports as any,
-      // })),
+      excludeCredentials: devices.map((dev) => ({
+        // should be a BufferSource
+        id: dev.credentialID as any,
+        type: 'public-key',
+        transports: dev.transports as any,
+      })),
       /**
        * The optional authenticatorSelection property allows for specifying more constraints around
        * the types of authenticators that users to can use for registration
@@ -127,9 +117,7 @@ webauthnRouter.post('/registration', async (req, res, next) => {
       };
       verification = await verifyRegistrationResponse(opts);
     } catch (error) {
-      const _error = error as Error;
-      console.error(_error);
-      return res.status(400).send({ error: _error.message });
+      return next(error);
     }
 
     const { verified, registrationInfo } = verification;
@@ -141,19 +129,20 @@ webauthnRouter.post('/registration', async (req, res, next) => {
         counter,
       } = registrationInfo;
 
-      const existingDevice = devices.find(device => device.credentialID === credentialID.toString());
+      const existingDevice = devices.find(device => device.credentialID === credentialID);
 
       if (!existingDevice) {
         /**
          * Add the returned device to the user's list of devices
          */
-        const newDevice: AuthenticatorDevice = {
+        const newDevice: Parameters<typeof AuthticatorDevice.create>[0] = {
           credentialPublicKey,
           credentialID,
           counter,
           transports: body.transports,
+          userId: user.id,
         };
-        // user.devices.push(newDevice);
+        await AuthticatorDevice.create(newDevice);
       }
     }
 
@@ -169,9 +158,36 @@ webauthnRouter.post('/registration', async (req, res, next) => {
 // returns the options for webauthn authentication
 webauthnRouter.get('/authentication', async (req, res, next) => {
   try {
+    const sequelize = req.app.get('sequelize');
+    const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user: Instances['User'] = res.locals.user;
-    console.info('[webauthn] GET authentication', user)
-    res.status(501).json({ error: 'Not Implemented' });
+    const devices = await AuthticatorDevice.findAll({
+      where: {
+        userId: user.id,
+      }
+    });
+
+    console.info('[webauthn] GET authentication', user);
+    const opts: GenerateAuthenticationOptionsOpts = {
+      timeout: 60000,
+      allowCredentials: devices.map(dev => ({
+        id: dev.credentialID,
+        type: 'public-key',
+        transports: dev.transports ?? ['usb', 'ble', 'nfc', 'internal'],
+      })) as any,
+      userVerification: 'required',
+      rpID: req.app.get('rpId'),
+    };
+
+    const options = generateAuthenticationOptions(opts);
+
+    /**
+     * The server needs to temporarily remember this value for verification, so don't lose it until
+     * after you verify an authenticator response.
+     */
+    user.setDataValue('currentChallenge', options.challenge);
+    await user.save();
+    res.json(options);
   } catch (err) {
     next(err);
   }
@@ -180,9 +196,59 @@ webauthnRouter.get('/authentication', async (req, res, next) => {
 // verifies of a webauthn authentication
 webauthnRouter.post('/authentication', async (req, res, next) => {
   try {
+    const sequelize = req.app.get('sequelize');
+    const AuthticatorDevice = <Models['AuthenticatorDevice']>sequelize.model('AuthenticatorDevice');
     const user: Instances['User'] = res.locals.user;
     console.info('[webauthn] POST authentication', user)
-    res.status(501).json({ error: 'Not Implemented' });
+    const body: AuthenticationCredentialJSON = req.body;
+    const devices = await AuthticatorDevice.findAll({
+      where: {
+        userId: user.id,
+      }
+    });
+
+    const expectedChallenge = user.currentChallenge;
+
+    let dbAuthenticator;
+    const bodyCredIDBuffer = base64url.toBuffer(body.rawId);
+    // "Query the DB" here for an authenticator matching `credentialID`
+    for (const dev of devices) {
+      if (dev.credentialID.equals(bodyCredIDBuffer)) {
+        dbAuthenticator = dev;
+        break;
+      }
+    }
+
+    if (!dbAuthenticator) {
+      throw new Error(`could not find authenticator matching ${body.id}`);
+    }
+
+    let verification: VerifiedAuthenticationResponse;
+    try {
+      const opts: VerifyAuthenticationResponseOpts = {
+        credential: body,
+        expectedChallenge: `${expectedChallenge}`,
+        expectedOrigin: req.app.get('publicUrl'),
+        expectedRPID: req.app.get('rpId'),
+        authenticator: dbAuthenticator,
+        requireUserVerification: true,
+      };
+      verification = verifyAuthenticationResponse(opts);
+    } catch (error) {
+      const _error = error as Error;
+      console.error(_error);
+      return res.status(400).send({ error: _error.message });
+    }
+
+    const { verified, authenticationInfo } = verification;
+
+    if (verified) {
+      // Update the authenticator's counter in the DB to the newest count in the authentication
+      dbAuthenticator.counter = authenticationInfo.newCounter;
+      await dbAuthenticator.save();
+    }
+
+    res.json({ verified });
   } catch (err) {
     next(err);
   }
