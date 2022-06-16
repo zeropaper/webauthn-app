@@ -132,12 +132,13 @@ async function createApp(options: CreateAppOptions): Promise<express.Application
     app.set('rp', options.relayParty);
     app.set('rpId', options.relayPartyId);
     app.set('publicUrl', options.publicUrl);
+    app.set('created', new Date());
 
     if (process.env.NODE_ENV !== 'test') app.use(helmet());
-    app.use(cors({
-      origin: true,
-      credentials: true,
-    }));
+    // app.use(cors({
+    //   origin: true,
+    //   credentials: true,
+    // }));
     app.use(express.json());
     app.use(logger);
 
