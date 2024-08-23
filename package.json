@@ -34,7 +34,7 @@
     "@types/imap": "0.8.35",
     "@types/nodemailer": "6.4.5",
     "base64url": "3.0.1",
-    "connect-session-sequelize": "7.1.4",
+    "connect-session-sequelize": "7.1.7",
     "cors": "2.8.5",
     "dotenv": "16.0.1",
     "express": "4.18.1",
