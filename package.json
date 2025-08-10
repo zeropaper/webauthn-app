@@ -57,7 +57,7 @@
     "@types/supertest": "2.0.12",
     "jest": "28.1.3",
     "nodemailer-mock": "1.5.12",
-    "nodemon": "2.0.16",
+    "nodemon": "2.0.22",
     "supertest": "6.2.4",
     "ts-jest": "28.0.8"
   }
